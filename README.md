@@ -1,9 +1,6 @@
 #include "mbed.h"
 #include "rbms.h" 
-// #include "rote_robo_ms.h" 
 
-
-#define BRAKE 0
 #define TOTAL_MOTOR 1
 
 UnbufferedSerial pc(USBTX, USBRX, 921600);

@@ -1,3 +1,5 @@
+//Serialは絶対921600!!!!!!!!!!!!!
+
 #include "mbed.h"
 #include "rbms.h" 
 

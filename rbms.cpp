@@ -80,10 +80,8 @@ void rbms::rbms_read(CANMessage &msg, short *rotation,short *speed) {//motorか�
 }
 
 void rbms::can_read(){//motorからdata受信
-    while(true){
         if(_can.read(_msg)){//_msgにcanの受信dataを代入
         }
-    }
 }
 
 float rbms::pid(float T,short rpm_now, short set_speed,float *delta_rpm_pre,float *ie_spd,float KP, float KI,float KD )//pid制御
@@ -142,7 +140,7 @@ void rbms::deg_control(int* set_deg,int* motor){//速度制御用関数
     short rotation[_motor_num],speed[_motor_num];
     float delta_deg_pre[_motor_num],delta_rpm_pre[_motor_num],ie_deg[_motor_num],ie_spd[_motor_num];
     int last_rotation[_motor_num],sum_deg[_motor_num],sum_rotation[_motor_num],set_speed[_motor_num];
-    Timer tm[_motor_num];//タイマーインスタンス生成(配列ではない)
+    Timer tm[_motor_num],time;//タイマーインスタンス生成(配列ではない)
     for(int i=0;i<_motor_num;i++){//初期化
         delta_deg_pre[i]=0.0;
         delta_rpm_pre[i]=0.0;
@@ -150,7 +148,7 @@ void rbms::deg_control(int* set_deg,int* motor){//速度制御用関数
         ie_deg[i]=0.0;
         ie_spd[i]=0.0;
         tm[i].start();
-    }
+    }    
     while(1){
         for(int id=0;id<_motor_num;id++){
             if(_msg.id==0x201+id){//esc idごとに受信データ割り振り
@@ -178,8 +176,8 @@ void rbms::deg_control(int* set_deg,int* motor){//速度制御用関数
                 if(motor[id]>_motor_max){motor[id]=_motor_max;}else if(motor[id]<-_motor_max){motor[id]=-_motor_max;}//上限確認超えてた場合は上限値にset
                 //printf("%6d%6d%6d%6d%6d%6d%6d\r\n",rotation[id],sum_rotation[0],set_deg[0]*36,sum_deg[0],set_speed[0],speed[0],motor[0]);
             }
-
         }
-        ThisThread::sleep_for(1ms);
+        ThisThread::sleep_for(3ms);
     }
 }
+

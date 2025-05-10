@@ -10,7 +10,7 @@ class rbms {
         void rbms_read(CANMessage &msg, short *rotation,short *speed);
         void can_read();
         float pid(float T,short rpm_now, short set_speed,float *delta_rpm_pre,float *ie_spd,float KP=25,float KI=10, float KD=0);
-        float pid_deg(float T,short deg_now, short set_deg,float *delta_deg_pre,float *ie_deg,float KP=0.05,float KI=0.005, float KD=0);
+        float pid_deg(float T,short deg_now, short set_deg,float *delta_deg_pre,float *ie_deg,float KP=0.03,float KI=0.005, float KD=0);
         void spd_control(int* set_speed,int* motor);
         void deg_control(int* set_deg,int* motor);
     private:
@@ -24,10 +24,6 @@ class rbms {
         int _speed;
         int _torque;
         int _temperature;
-        // int _last_rotation;
-        // int _sum_deg;
-        // int _sum_rotation;
-
 };
 
 

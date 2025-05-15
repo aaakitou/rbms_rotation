@@ -124,7 +124,7 @@ void rbms::spd_control(int* set_speed,int* motor){//速度制御用関数
     }
 }
 
-float rbms::pid_deg(float T,short deg_now, short set_deg,float *delta_deg_pre,float *ie_deg,float KP, float KI,float KD )//pid制御
+float rbms::pid_deg(float T,int deg_now, int set_deg,float *delta_deg_pre,float *ie_deg,float KP, float KI,float KD )//pid制御
 {
     float de;
     float delta_deg;
@@ -137,9 +137,10 @@ float rbms::pid_deg(float T,short deg_now, short set_deg,float *delta_deg_pre,fl
 }
 
 void rbms::deg_control(int* set_deg,int* motor){//速度制御用関数
-    short rotation[_motor_num],speed[_motor_num];
+    short rotation[_motor_num],speed[_motor_num],last_rotation[_motor_num];
     float delta_deg_pre[_motor_num],delta_rpm_pre[_motor_num],ie_deg[_motor_num],ie_spd[_motor_num];
-    int last_rotation[_motor_num],sum_deg[_motor_num],sum_rotation[_motor_num],set_speed[_motor_num];
+    int sum_rotation[_motor_num],set_speed[_motor_num];
+    int sum_deg[_motor_num];
     Timer tm[_motor_num],time;//タイマーインスタンス生成(配列ではない)
     for(int i=0;i<_motor_num;i++){//初期化
         delta_deg_pre[i]=0.0;
@@ -154,19 +155,21 @@ void rbms::deg_control(int* set_deg,int* motor){//速度制御用関数
             if(_msg.id==0x201+id){//esc idごとに受信データ割り振り
                 CANMessage msg=_msg;
                 rbms_read(msg,&rotation[id],&speed[id]);//data変換
-                if(speed[id]>0 && rotation[id]-last_rotation[id]<0){
-                    sum_rotation[id]+=1;
-                }else if(speed[id]<0 && rotation[id]-last_rotation[id]>0){
-                    sum_rotation[id]-=1;
-                }
-                sum_deg[id]=sum_rotation[id]*360+rotation[id];
+                if(speed[id]>0 && rotation[id]-last_rotation[id]<0)sum_rotation[id]+=1;
+                if(speed[id]<0 && rotation[id]-last_rotation[id]>0)sum_rotation[id]-=1;
+                if(sum_rotation[id]>=0)sum_deg[id]=sum_rotation[id]*360+rotation[id];
+                if(sum_rotation[id]<0)sum_deg[id]=sum_rotation[id]*360+rotation[id]-360;
+                
                 last_rotation[id]=rotation[id];
+
                 if(_motor_type){
                     set_speed[id]=(int)pid_deg(tm[id].read(),sum_deg[id],set_deg[id]*19,&delta_deg_pre[id],&ie_deg[id]);
                 }else{
                     set_speed[id]=(int)pid_deg(tm[id].read(),sum_deg[id],set_deg[id]*36,&delta_deg_pre[id],&ie_deg[id]);
                 }
                 tm[id].reset();
+                if(set_speed[id]>450)set_speed[id]=450;
+                if(set_speed[id]<-450)set_speed[id]=-450;
                 if(_motor_type){
                     motor[id] = (int)pid(tm[id].read(),speed[id]/19,set_speed[id],&delta_rpm_pre[id],&ie_spd[id]);
                 }else{
@@ -174,10 +177,11 @@ void rbms::deg_control(int* set_deg,int* motor){//速度制御用関数
                 }
                 tm[id].reset();//timer reset
                 if(motor[id]>_motor_max){motor[id]=_motor_max;}else if(motor[id]<-_motor_max){motor[id]=-_motor_max;}//上限確認超えてた場合は上限値にset
-                //printf("%6d%6d%6d%6d%6d%6d%6d\r\n",rotation[id],sum_rotation[0],set_deg[0]*36,sum_deg[0],set_speed[0],speed[0],motor[0]);
+            //printf("%10d %10d %10d %10d %10d %10d %10d\r\n",rotation[id],sum_rotation[0],set_deg[0]*36,sum_deg[0],set_speed[0],speed[0],motor[0]);
             }
         }
-        ThisThread::sleep_for(3ms);
+        ThisThread::sleep_for(1ms);
+        //wait_us(800);
     }
 }
 

@@ -1,9 +1,7 @@
-//Serialは絶対921600!!!!!!!!!!!!!
-
 #include "mbed.h"
 #include "rbms.h" 
 
-#define TOTAL_MOTOR 1
+#define TOTAL_MOTOR 4
 
 UnbufferedSerial pc(USBTX, USBRX, 921600);
 //CAN can(PA_11, PA_12);//303
@@ -18,31 +16,32 @@ void can_receive();
 CANMessage msg;
 int set_deg[TOTAL_MOTOR]={0}; // 回したい角度（ギアのかんだあとの方）
 int motor[TOTAL_MOTOR]={0};
-//Timer a;
-//int co=0;
-//float t;
+// Timer a;
+// int co=0;
+// float t;
 int main(){
     char key;
     //a.start();
     //thread_can.start(can_receive); // スレッドの開始 
     thread1.start(motor_deg_control);
-    can.attach(onReceive, CAN::RxIrq); // 受信割り込みハンドラを設定
     thread_can.start(callback(&queue, &EventQueue::dispatch_forever));
+    can.attach(onReceive, CAN::RxIrq); // 受信割り込みハンドラを設定
+    
     while(true){
         if(pc.readable()){
             pc.read(&key, 1);
             switch(key){
                 case 't':
                     printf("'%c' pushed  ", key);
-                    set_deg[0] =  400;
+                    set_deg[0] =  1080;
                     break;
                 case 'g':
                     printf("'%c' pushed  ", key);
-                    set_deg[0] =  -800;
+                    set_deg[0] =  3600;
                     break;
                 case 'b':
                     printf("'%c' pushed  ", key);
-                    set_deg[0] = 0;
+                    set_deg[0] = 1;
                     break;
                 case 'i':
                     printf("'%c' pushed  ", key);

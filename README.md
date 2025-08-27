@@ -1,3 +1,4 @@
+```
 #include "mbed.h"
 #include "rbms.h" 
 
@@ -79,3 +80,5 @@ void can_receive(){
 void onReceive() {
     queue.call(can_receive); // EventQueueにCANreceive関数を登録
 }
+
+```

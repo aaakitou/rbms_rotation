@@ -1,3 +1,4 @@
+~~~sample.cpp
 #include "mbed.h"
 #include "rbms.h" 
 
@@ -75,7 +76,8 @@ void can_receive(){
     m2006.can_read(); // canは常に受信させておく
     //co+=1;
 }
-
+~~~
 void onReceive() {
     queue.call(can_receive); // EventQueueにCANreceive関数を登録
 }
+
